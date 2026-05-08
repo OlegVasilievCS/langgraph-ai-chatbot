@@ -17,12 +17,17 @@ os.environ["LANGCHAIN_PROJECT"] = "CourseLanggraph"
 
 llm = ChatGroq(groq_api_key=groq_key, model_name="llama-3.1-8b-instant")
 
-response = llm.invoke("Best Asian food in Montreal?")
-
 class State(TypedDict):
     # Messages of are of type 'list'. The add_messages appends each message to
     #  the list, instead of overwritng. 
     messages: Annotated[list, add_messages]   
 
+graph_builder = StateGraph(State)
 
-print(response.content)
+def chatbot(state: State):
+    return {"messages": llm.invoke(state['messages'])}
+
+graph_builder.add_node("chatbot", chatbot)
+
+graph_builder.add_edge(START, "chatbot")
+graph_builder.add_edge("chatbot", END)
